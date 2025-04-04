@@ -6,14 +6,13 @@ use alloc::vec::Vec;
 use elastic_elgamal::{group::Ristretto, *};
 use stylus_sdk::storage::StorageGuardMut;
 use stylus_sdk::{
+    abi::Bytes,
     alloy_primitives::{Address, U256, U8},
-    msg,
     prelude::*,
     storage::{
-        StorageAddress, StorageBool, StorageBytes, StorageMap, StorageString, StorageU256, StorageU8,
-        StorageVec,
+        StorageAddress, StorageBool, StorageBytes, StorageMap, StorageString, StorageU256,
+        StorageU8, StorageVec,
     },
-    abi::Bytes,
 };
 
 #[storage]
@@ -57,12 +56,13 @@ impl VotingSystem {
 
         // // Validate the public key by attempting to parse it
         let _ = PublicKey::<Ristretto>::from_bytes(&public_key).expect("Invalid public key format");
+        let sender = self.vm().msg_sender();
 
         let campaign_id = self.campaign_count.get();
         self.campaign_count.set(campaign_id + U256::from(1));
 
         let mut new_campaign = self.campaigns.setter(campaign_id);
-        new_campaign.owner.set(msg::sender());
+        new_campaign.owner.set(sender);
         new_campaign.description.set_str(description);
         new_campaign.start_time.set(start_time);
         new_campaign.end_time.set(end_time);
@@ -75,18 +75,25 @@ impl VotingSystem {
 
     pub fn secure_vote(&mut self, encrypted_vote: Vec<Bytes>, campaign_id: U256) {
         let campaign = self.campaigns.getter(campaign_id);
-        
-        assert!(campaign.is_tallyed.get(), "Campaign has been tallied");
-        assert!(!campaign.has_voted.getter(msg::sender()).get(), "Already voted");
+
+        let sender = self.vm().msg_sender();
+        assert!(!campaign.is_tallyed.get(), "Campaign has been tallied");
+        assert!(!campaign.has_voted.getter(sender).get(), "Already voted");
 
         // Check voting period
-        // let current_time = U256::from(block_timestamp());
-        // assert!(current_time >= campaign.startTime.get(), "Voting has not started yet");
-        // assert!(current_time <= campaign.endTime.get(), "Voting has ended");
-        
+        let current_time = self.vm().block_timestamp();
+        assert!(
+            U256::from(current_time) >= campaign.start_time.get(),
+            "Voting has not started yet"
+        );
+        assert!(
+            U256::from(current_time) <= campaign.end_time.get(),
+            "Voting has ended"
+        );
+
         let mut campaign = self.campaigns.setter(campaign_id);
 
-        campaign.has_voted.setter(msg::sender()).set(true);
+        campaign.has_voted.setter(sender).set(true);
 
         let mut new_vec: StorageGuardMut<StorageVec<StorageBytes>> = campaign.votes.grow();
         for (index, bytes) in encrypted_vote.into_iter().enumerate() {
@@ -96,21 +103,28 @@ impl VotingSystem {
 
     pub fn vote(&mut self, option: U8, campaign_id: U256) {
         let campaign = self.campaigns.getter(campaign_id);
-        
-        assert!(campaign.is_tallyed.get(), "Campaign has been tallied");
-        assert!(!campaign.has_voted.getter(msg::sender()).get(), "Already voted");
+
+        let sender = self.vm().msg_sender();
+        assert!(!campaign.is_tallyed.get(), "Campaign has been tallied");
+        assert!(!campaign.has_voted.getter(sender).get(), "Already voted");
 
         let option_count = campaign.option_count.get();
         assert!(option < option_count, "Invalid option");
 
         // Check voting period
-        // let current_time = U256::from(block_timestamp());
-        // assert!(current_time >= campaign.startTime.get(), "Voting has not started yet");
-        // assert!(current_time <= campaign.endTime.get(), "Voting has ended");
-        
+        let current_time = self.vm().block_timestamp();
+        assert!(
+            U256::from(current_time) >= campaign.start_time.get(),
+            "Voting has not started yet"
+        );
+        assert!(
+            U256::from(current_time) <= campaign.end_time.get(),
+            "Voting has ended"
+        );
+
         let mut campaign = self.campaigns.setter(campaign_id);
 
-        campaign.has_voted.setter(msg::sender()).set(true);
+        campaign.has_voted.setter(sender).set(true);
 
         let current_votes = campaign.option_to_votes.getter(option).get();
         campaign
@@ -119,18 +133,34 @@ impl VotingSystem {
             .set(current_votes + U256::from(1));
     }
 
-    pub fn tally_votes(&mut self, campaign_id: U256){
+    pub fn tally_votes(&mut self, campaign_id: U256) {
         let campaign = self.campaigns.get(campaign_id);
-        
-        assert!(campaign.is_tallyed.get(), "Campaign has already been tallied");
-        assert!(msg::sender() == campaign.owner.get(), "Only the owner can tally votes");
+
+        assert!(
+            campaign.is_tallyed.get(),
+            "Campaign has already been tallied"
+        );
+        assert!(
+            self.vm().msg_sender() == campaign.owner.get(),
+            "Only the owner can tally votes"
+        );
     }
 
     pub fn get_votes_for_campaign(&self, campaign_id: U256) -> Vec<U256> {
-        let num_options = self.campaigns.getter(campaign_id).option_count.get().to::<u8>();
+        let num_options = self
+            .campaigns
+            .getter(campaign_id)
+            .option_count
+            .get()
+            .to::<u8>();
         let mut all_votes = Vec::<U256>::new();
         for i in 0..num_options {
-            let votes = self.campaigns.getter(campaign_id).option_to_votes.getter(U8::from(i)).get();
+            let votes = self
+                .campaigns
+                .getter(campaign_id)
+                .option_to_votes
+                .getter(U8::from(i))
+                .get();
             all_votes.push(votes);
         }
 
@@ -152,7 +182,7 @@ impl VotingSystem {
     pub fn get_campaign_end_time(&self, campaign_id: U256) -> U256 {
         self.campaigns.getter(campaign_id).end_time.get()
     }
-    
+
     pub fn get_campaign_option_count(&self, campaign_id: U256) -> U8 {
         self.campaigns.getter(campaign_id).option_count.get()
     }
