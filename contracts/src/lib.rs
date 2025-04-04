@@ -3,10 +3,8 @@ extern crate alloc;
 
 use alloc::string::String;
 use alloc::vec::Vec;
-use alloy_primitives::ruint::aliases::U8;
 use elastic_elgamal::{group::Ristretto, *};
-use elastic_elgamal::app::{EncryptedChoice, SingleChoice};
-use stylus_sdk::storage::{StorageGuard, StorageGuardMut, StorageU8};
+use stylus_sdk::storage::StorageGuardMut;
 use stylus_sdk::{
     alloy_primitives::{Address, U256},
     msg,
