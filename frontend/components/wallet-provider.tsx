@@ -12,7 +12,7 @@ import {
 import { metaMask } from 'wagmi/connectors';
 
 // Arbitrum One chain ID
-const ARBITRUM_CHAIN_ID = 42161;
+const ARBITRUM_CHAIN_ID = 412346; // local chain id
 
 interface WalletProviderProps {
 	children: ReactNode;
