@@ -3,8 +3,10 @@ extern crate alloc;
 
 use alloc::string::String;
 use alloc::vec::Vec;
+use alloy_primitives::ruint::aliases::U8;
 use elastic_elgamal::{group::Ristretto, *};
 use elastic_elgamal::app::{EncryptedChoice, SingleChoice};
+use stylus_sdk::storage::StorageU8;
 use stylus_sdk::{
     alloy_primitives::{Address, U256},
     msg,
@@ -25,12 +27,11 @@ pub struct Campaign {
     description: StorageString,
     start_time: StorageU256,
     end_time: StorageU256,
-    option_count: StorageU256,
+    option_count: StorageU8,
     public_key: StorageBytes,
     is_tallyed: StorageBool,
     has_voted: StorageMap<Address, StorageBool>,
     votes: StorageVec<StorageBytes>,
-    address_to_vote: StorageMap<Address, StorageBytes>,
 }
 
 #[public]
@@ -128,7 +129,35 @@ impl VotingSystem {
                 *tally += vote;
             }
         }
-        
         // Store the tally result
+    }
+
+
+    pub fn get_campaign_owner(&self, campaign_id: U256) -> Address {
+        self.campaigns.getter(campaign_id).owner.get()
+    }
+
+    pub fn get_campaign_description(&self, campaign_id: U256) -> String {
+        self.campaigns.getter(campaign_id).description.get_string()
+    }
+
+    pub fn get_campaign_start_time(&self, campaign_id: U256) -> U256 {
+        self.campaigns.getter(campaign_id).start_time.get()
+    }
+
+    pub fn get_campaign_end_time(&self, campaign_id: U256) -> U256 {
+        self.campaigns.getter(campaign_id).end_time.get()
+    }
+    
+    pub fn get_campaign_option_count(&self, campaign_id: U256) -> U8 {
+        self.campaigns.getter(campaign_id).option_count.get()
+    }
+
+    pub fn get_campaign_public_key(&self, campaign_id: U256) -> Vec<u8> {
+        self.campaigns.getter(campaign_id).public_key.get_bytes()
+    }
+
+    pub fn is_campaign_tallied(&self, campaign_id: U256) -> bool {
+        self.campaigns.getter(campaign_id).is_tallyed.get()
     }
 }
