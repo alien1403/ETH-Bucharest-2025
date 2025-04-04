@@ -1398,6 +1398,7 @@ dependencies = [
  "merlin",
  "rand_chacha",
  "rand_core",
+ "serde",
  "sha2",
  "subtle",
  "zeroize",
@@ -4275,6 +4276,7 @@ dependencies = [
  "getrandom 0.2.15",
  "hex",
  "mini-alloc 0.4.2",
+ "serde_json",
  "stylus-sdk",
  "tokio",
 ]

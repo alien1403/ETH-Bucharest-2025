@@ -16,6 +16,7 @@ use stylus_sdk::{
         StorageVec,
     },
 };
+use stylus_sdk::abi::Bytes;
 
    #[storage]
    #[entrypoint]
@@ -30,11 +31,11 @@ pub struct Campaign {
     description: StorageString,
     start_time: StorageU256,
     end_time: StorageU256,
-    option_count: StorageU8,
+    option_count: StorageU256,
     public_key: StorageBytes,
     is_tallyed: StorageBool,
     has_voted: StorageMap<Address, StorageBool>,
-    votes: StorageVec<StorageBytes>,
+    votes: StorageVec<StorageVec<StorageBytes>>,
 }
 
 #[public]
@@ -76,7 +77,7 @@ impl VotingSystem {
         U256::from(25)
     }
 
-    pub fn vote(&mut self, encrypted_vote: Vec<u8>, campaign_id: U256) {
+    pub fn vote(&mut self, encrypted_vote: Vec<Bytes>, campaign_id: U256) {
         // Retrieve the campaign
         let campaign = self.campaigns.getter(campaign_id);
         
@@ -95,9 +96,22 @@ impl VotingSystem {
         let mut campaign = self.campaigns.setter(campaign_id);
         campaign.has_voted.setter(msg::sender()).set(true);
 
+        let mut vec = campaign.votes.grow();
+        vec.push(encrypted_vote.into());
+
+          // Manually add the vote
         let length = campaign.votes.len();
         campaign.votes.grow();
-        campaign.votes.setter(length).unwrap().set_bytes(encrypted_vote.clone());
+
+        let mut vote_storage = campaign.votes.get(length).unwrap();
+
+        
+        // vote_storage.resize(encrypted_vote.len());
+        
+        // Set each byte
+        for (i, byte) in encrypted_vote.into_iter().enumerate() {
+            vote_storage.setter(i).unwrap().set_bytes(byte);
+        }
     }
 
     pub fn tally_votes(&mut self, campaign_id: U256) {
@@ -120,20 +134,8 @@ impl VotingSystem {
             let encrypted_vote_bytes = votes.get(i).unwrap().get_bytes();
             
             // Deserialize the encrypted vote
-            let encrypted_choice = EncryptedChoice::<Ristretto, SingleChoice>::
-            
-            // Verify the vote
-            let pk_bytes = campaign.publicKey.get();
-            let public_key = PublicKey::<Ristretto>::from_bytes(&pk_bytes)
-                .expect("Invalid public key format");
-            let choice_params = ChoiceParams::single(public_key, options_count);
-            let choice_ciphertexts = encrypted_choice.verify(&choice_params)
-                .expect("Invalid vote");
-            
-            // Add the vote ciphertexts to our running tallies
-            for (tally, &vote) in encrypted_tallies.iter_mut().zip(choice_ciphertexts.iter()) {
-                *tally += vote;
-            }
+            let encrypted_choice = EncryptedChoice::<Ristretto, SingleChoice>::new(params, choices, rng)
+                .expect("Invalid encrypted vote format");
         }
         // Store the tally result
     }
@@ -155,7 +157,7 @@ impl VotingSystem {
         self.campaigns.getter(campaign_id).end_time.get()
     }
     
-    pub fn get_campaign_option_count(&self, campaign_id: U256) -> U8 {
+    pub fn get_campaign_option_count(&self, campaign_id: U256) -> U256 {
         self.campaigns.getter(campaign_id).option_count.get()
     }
 
