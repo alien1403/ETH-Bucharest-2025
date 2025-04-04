@@ -6,7 +6,7 @@ use alloc::vec::Vec;
 use alloy_primitives::ruint::aliases::U8;
 use elastic_elgamal::{group::Ristretto, *};
 use elastic_elgamal::app::{EncryptedChoice, SingleChoice};
-use stylus_sdk::storage::{StorageGuardMut, StorageU8};
+use stylus_sdk::storage::{StorageGuard, StorageGuardMut, StorageU8};
 use stylus_sdk::{
     alloy_primitives::{Address, U256},
     msg,
@@ -18,12 +18,12 @@ use stylus_sdk::{
 };
 use stylus_sdk::abi::Bytes;
 
-   #[storage]
-   #[entrypoint]
-    pub struct VotingSystem {
-        campaigns: StorageMap<U256, Campaign>,
-        campaign_count: StorageU256,
-    }
+#[storage]
+#[entrypoint]
+pub struct VotingSystem {
+    campaigns: StorageMap<U256, Campaign>,
+    campaign_count: StorageU256,
+}
 
 #[storage]
 pub struct Campaign {
@@ -48,9 +48,8 @@ impl VotingSystem {
         option_count: u8,
         public_key: Vec<u8>,
     ) -> U256 {
-        // Validate inputs
         assert!(
-            option_count > 1 && option_count <= 10,
+            option_count > 1 && option_count <= 6,
             "Invalid option count"
         );
         assert!(end_time > start_time, "End time must be after start time");
@@ -58,11 +57,9 @@ impl VotingSystem {
         // // Validate the public key by attempting to parse it
         let _ = PublicKey::<Ristretto>::from_bytes(&public_key).expect("Invalid public key format");
 
-        // Get the next campaign ID
         let campaign_id = self.campaign_count.get();
         self.campaign_count.set(campaign_id + U256::from(1));
 
-        // Store the campaign
         let mut new_campaign = self.campaigns.setter(campaign_id);
         new_campaign.owner.set(msg::sender());
         new_campaign.description.set_str(description);
@@ -72,28 +69,22 @@ impl VotingSystem {
         new_campaign.public_key.set_bytes(public_key);
         new_campaign.is_tallyed.set(false);
 
-        // // Return the campaign ID
-        // campaign_id
-        U256::from(25)
+        campaign_id
     }
 
     pub fn vote(&mut self, encrypted_vote: Vec<Bytes>, campaign_id: U256) {
-        // Retrieve the campaign
         let campaign = self.campaigns.getter(campaign_id);
         
-        // Verify campaign exists
         assert!(campaign.is_tallyed.get(), "Campaign has been tallied");
-        
+        assert!(!campaign.has_voted.getter(msg::sender()).get(), "Already voted");
+
         // Check voting period
         // let current_time = U256::from(block_timestamp());
         // assert!(current_time >= campaign.startTime.get(), "Voting has not started yet");
         // assert!(current_time <= campaign.endTime.get(), "Voting has ended");
         
-        // Check if user has already voted
-        assert!(!campaign.has_voted.getter(msg::sender()).get(), "Already voted");
-        
-        // Mark the user as having voted
         let mut campaign = self.campaigns.setter(campaign_id);
+
         campaign.has_voted.setter(msg::sender()).set(true);
 
         let mut new_vec: StorageGuardMut<StorageVec<StorageBytes>> = campaign.votes.grow();
@@ -104,27 +95,29 @@ impl VotingSystem {
 
     pub fn tally_votes(&mut self, campaign_id: U256) {
         // Retrieve the campaign
-        // let mut campaign = self.campaigns.setter(campaign_id);
+        let mut campaign = self.campaigns.setter(campaign_id);
         
-        // assert!(campaign.is_tallyed.get(), "Campaign has already been tallied");
-        // assert!(msg::sender() == campaign.owner.get(), "Only the owner can tally votes");
+        assert!(campaign.is_tallyed.get(), "Campaign has already been tallied");
+        assert!(msg::sender() == campaign.owner.get(), "Only the owner can tally votes");
         
-        // // Tally votes
-        // let pk_bytes = campaign.public_key.get_bytes();
-        // let public_key = PublicKey::<Ristretto>::from_bytes(&pk_bytes)
-        //     .expect("Invalid public key format");
-        // let votes = &campaign.votes;
+        // Tally votes
+        let pk_bytes = campaign.public_key.get_bytes();
+        let public_key = PublicKey::<Ristretto>::from_bytes(&pk_bytes)
+            .expect("Invalid public key format");
+        let votes = &campaign.votes;
 
-        // let options_count = campaign.option_count.get().to::<usize>();
-        // let mut encrypted_totals = vec![Ciphertext::zero(); usize::from(options_count)];
+        let options_count = campaign.option_count.get().to::<usize>();
+        let mut encrypted_totals = vec![Ciphertext::<Ristretto>::zero(); usize::from(options_count)];
 
-        // for i in 0..votes.len() {
-        //     let encrypted_vote_bytes = votes.get(i).unwrap().get_bytes();
-            
-        //     // Deserialize the encrypted vote
-        //     let encrypted_choice = EncryptedChoice::<Ristretto, SingleChoice>::new(params, choices, rng)
-        //         .expect("Invalid encrypted vote format");
-        // }
+        for i in 0..votes.len() {
+            let serialized_enc_vote = votes.get(i).unwrap();
+            for j in 1..serialized_enc_vote.len() {
+                let ser_ciphertext = serialized_enc_vote.get(j).unwrap();
+                let ciphertext = Ciphertext::<Ristretto>::from(ser_ciphertext.get_bytes());
+            }
+        }
+
+        
         // Store the tally result
     }
 
