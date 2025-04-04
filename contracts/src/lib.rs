@@ -25,6 +25,7 @@ pub struct VotingSystem {
 #[storage]
 pub struct Campaign {
     owner: StorageAddress,
+    title: StorageString,
     description: StorageString,
     start_time: StorageU256,
     end_time: StorageU256,
@@ -42,11 +43,13 @@ pub struct Campaign {
 impl VotingSystem {
     pub fn create_campaign(
         &mut self,
+        title: String,
         description: String,
         start_time: U256,
         end_time: U256,
         option_count: u8,
         public_key: Vec<u8>,
+        eligible_voters: Vec<Address>,
     ) -> U256 {
         assert!(
             option_count > 1 && option_count <= 6,
@@ -62,6 +65,7 @@ impl VotingSystem {
         self.campaign_count.set(campaign_id + U256::from(1));
 
         let mut new_campaign = self.campaigns.setter(campaign_id);
+        new_campaign.title.set_str(title);
         new_campaign.owner.set(sender);
         new_campaign.description.set_str(description);
         new_campaign.start_time.set(start_time);
@@ -69,6 +73,10 @@ impl VotingSystem {
         new_campaign.option_count.set(U8::from(option_count));
         new_campaign.public_key.set_bytes(public_key);
         new_campaign.is_tallyed.set(false);
+
+        for address in eligible_voters {
+            new_campaign.has_voted.setter(address).set(true);
+        }
 
         campaign_id
     }
@@ -167,6 +175,10 @@ impl VotingSystem {
         all_votes
     }
 
+    pub fn get_campaign_title(&self, campaign_id: U256) -> String {
+        self.campaigns.getter(campaign_id).title.get_string()
+    }
+
     pub fn get_campaign_owner(&self, campaign_id: U256) -> Address {
         self.campaigns.getter(campaign_id).owner.get()
     }
@@ -193,5 +205,12 @@ impl VotingSystem {
 
     pub fn is_campaign_tallied(&self, campaign_id: U256) -> bool {
         self.campaigns.getter(campaign_id).is_tallyed.get()
+    }
+
+    pub fn is_wallet_eligible(&self, campaign_id: U256, wallet_address: Address) -> bool {
+        self.campaigns
+            .getter(campaign_id)
+            .has_voted
+            .get(wallet_address)
     }
 }

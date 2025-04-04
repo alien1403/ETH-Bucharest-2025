@@ -16,7 +16,9 @@ stylus-sdk = "0.8.0"
 hex = "0.4.3"
 dotenv = "0.15.0"
 getrandom = { version = "0.2", features = ["js"] }
-elastic-elgamal = { git = "https://github.com/cosmatudor/elastic-elgamal", features=["serde"] }
+elastic-elgamal = { git = "https://github.com/cosmatudor/elastic-elgamal", features = [
+    "serde",
+] }
 serde_json = "1.0"
 
 [dev-dependencies]
@@ -40,4 +42,4 @@ codegen-units = 1
 strip = true
 lto = true
 panic = "abort"
-opt-level = "s"
+opt-level = "z"
