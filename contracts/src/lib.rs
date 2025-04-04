@@ -72,8 +72,7 @@ impl VotingSystem {
         new_campaign.is_tallyed.set(false);
 
         // // Return the campaign ID
-        // campaign_id
-        U256::from(25)
+        campaign_id
     }
 
     pub fn vote(&mut self, encrypted_vote: Vec<u8>, campaign_id: U256) {
@@ -81,7 +80,7 @@ impl VotingSystem {
         let campaign = self.campaigns.getter(campaign_id);
         
         // Verify campaign exists
-        assert!(campaign.is_tallyed.get(), "Campaign has been tallied");
+        assert!(!campaign.is_tallyed.get(), "Campaign has been tallied");
         
         // Check voting period
         // let current_time = U256::from(block_timestamp());
@@ -120,9 +119,10 @@ impl VotingSystem {
             let encrypted_vote_bytes = votes.get(i).unwrap().get_bytes();
             
             // Deserialize the encrypted vote
-            let encrypted_choice = EncryptedChoice::<Ristretto, SingleChoice>::
+            let encrypted_choice = EncryptedChoice::<Ristretto, SingleChoice>::verify(&self, params)
             
             // Verify the vote
+            EncryptedChoice
             let pk_bytes = campaign.publicKey.get();
             let public_key = PublicKey::<Ristretto>::from_bytes(&pk_bytes)
                 .expect("Invalid public key format");
