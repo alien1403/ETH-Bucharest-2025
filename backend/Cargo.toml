@@ -1,0 +1,13 @@
+[package]
+name = "backend"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+elastic-elgamal = { version = "0.3", features = ["serde"] }
+rand = "0.8"
+serde = { version = "1.0", features = ["derive"] }
+warp = "0.3"
+tokio = { version = "1", features = ["full"] }
+hex = { version = "0.4", features = ["serde"] }
+tracing-subscriber = "0.3"
