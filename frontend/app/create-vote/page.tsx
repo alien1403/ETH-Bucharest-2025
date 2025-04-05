@@ -166,16 +166,28 @@ export default function CreateVotePage() {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-
-		if (!isConnected || !address) {
-			setCreationError('Please connect your wallet to create a vote');
-			return;
-		}
-
 		setIsCreating(true);
 		setCreationError(null);
 
 		try {
+			// Validate form data
+			if (
+				!formData.title ||
+				!formData.description ||
+				formData.options.length < 2
+			) {
+				alert('Please fill in all required fields and add at least 2 options');
+				setIsCreating(false);
+				return;
+			}
+
+			// Validate eligible wallets
+			if (formData.eligibleWallets.length === 0) {
+				alert('Please add at least one eligible wallet address');
+				setIsCreating(false);
+				return;
+			}
+
 			// Convert dates to timestamps
 			const startTimestamp = formData.startDate
 				? Math.floor(formData.startDate.getTime() / 1000)
@@ -185,76 +197,55 @@ export default function CreateVotePage() {
 				: 0;
 
 			// Generate a unique ID for this vote
-			const voteId = `vote-${Date.now()}-${Math.random()
-				.toString(36)
-				.substring(2, 9)}`;
+			const voteId = `vote-${Math.random().toString(36).substring(2, 9)}`;
 
 			// Get the public key from the Rust API
 			const publicKey = await getPublicKey(voteId);
 
 			// Convert Uint8Array to number array for the contract
-			const publicKeyArray = Array.from(publicKey);
-
-			// Prepare campaign data according to the contract ABI
-			const campaignParams = [
-				formData.description, // description: string
-				BigInt(startTimestamp), // start_time: uint256
-				BigInt(endTimestamp), // end_time: uint256
-				Number(formData.options.length), // option_count: uint8
-				publicKeyArray, // public_key: uint8[]
+			const publicKeyArray = [
+				6, 29, 99, 62, 224, 50, 233, 244, 165, 46, 163, 252, 242, 68, 252, 222,
+				162, 20, 139, 1, 82, 29, 192, 106, 222, 36, 58, 235, 131, 38, 121, 61,
 			];
 
-			// Call the contract to create the campaign
-			const txHash = await createCampaign(campaignParams);
-			console.log('Transaction submitted with hash:', txHash);
-
-			// Get entity data for the creator info
-			const entityData = JSON.parse(localStorage.getItem('entityData') || '{}');
-
-			// Save the completed vote to local storage
-			const createdVotes = JSON.parse(
-				localStorage.getItem('createdVotes') || '[]'
-			);
-			const newVote = {
-				...formData,
-				id: voteId,
-				status: 'active',
-				createdAt: new Date().toISOString(),
-				participation: 0,
-				totalVotes: 0,
-				creator: {
-					name: entityData.name || 'Governance DAO',
-					type: entityData.type || 'DAO',
-					id: 'creator-1',
-				},
-				results: {
-					yes: 0,
-					no: 0,
-					abstain: 0,
-				},
-				transactionHash: txHash,
-				publicKey: publicKeyArray, // Store the public key for later use
+			// Prepare campaign data according to the contract ABI
+			const campaignParams = {
+				title: formData.title,
+				description: formData.description,
+				startTime: startTimestamp,
+				endTime: endTimestamp,
+				optionCount: formData.options.length,
+				publicKey: publicKeyArray,
+				eligibleVoters: formData.eligibleWallets,
 			};
 
-			createdVotes.push(newVote);
-			localStorage.setItem('createdVotes', JSON.stringify(createdVotes));
-
-			// Clear the draft
-			localStorage.removeItem('draftVote');
-
-			// Update entity stats
-			if (entityData.votesCreated) {
-				entityData.votesCreated += 1;
-			} else {
-				entityData.votesCreated = 1;
+			// Show warning about gas limits
+			if (formData.eligibleWallets.length > 10) {
+				const proceed = window.confirm(
+					`Warning: You have ${formData.eligibleWallets.length} eligible voters. For gas optimization, only the first 10 will be included in the transaction. Do you want to proceed?`
+				);
+				if (!proceed) {
+					setIsCreating(false);
+					return;
+				}
 			}
-			localStorage.setItem('entityData', JSON.stringify(entityData));
 
+			// Create the campaign on the blockchain
+			const txHash = await createCampaign(campaignParams);
+
+			// Clear the form and local storage
+			setFormData(defaultFormData);
+			localStorage.removeItem('draftVote');
 			setIsSubmitted(true);
+
+			// Show success message with transaction hash
+			alert(`Vote created successfully! Transaction hash: ${txHash}`);
 		} catch (error) {
-			console.error('Error creating campaign:', error);
-			setCreationError(
-				error instanceof Error ? error.message : 'Failed to create campaign'
+			console.error('Error creating vote:', error);
+			alert(
+				`Error creating vote: ${
+					error instanceof Error ? error.message : String(error)
+				}`
 			);
 		} finally {
 			setIsCreating(false);
@@ -316,6 +307,9 @@ export default function CreateVotePage() {
 		reader.onload = (event) => {
 			try {
 				const content = event.target?.result as string;
+				if (!content) {
+					throw new Error('Failed to read file content');
+				}
 				const lines = content.split(/\r\n|\n/).filter((line) => line.trim());
 
 				// Validate addresses

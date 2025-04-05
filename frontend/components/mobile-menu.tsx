@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { useWallet } from '@/hooks/use-wallet-context';
 
 // Organization address with special permissions
-const ORGANIZATION_ADDRESS = '0xc463899B039c7E16DFA40627C231f2714Ec37471';
+const ORGANIZATION_ADDRESS = '0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E';
 
 interface MobileMenuProps {
 	isOpen: boolean;

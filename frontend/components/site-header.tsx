@@ -27,7 +27,7 @@ import { WalletHeader } from '@/components/wallet-header';
 import { useWallet } from '@/hooks/use-wallet-context';
 
 // Organization address with special permissions
-const ORGANIZATION_ADDRESS = '0xc463899B039c7E16DFA40627C231f2714Ec37471';
+const ORGANIZATION_ADDRESS = '0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E';
 
 interface SiteHeaderProps {
 	mobileMenuOpen: boolean;
@@ -78,9 +78,11 @@ export function SiteHeader({
 	}, [isConnected, address]);
 
 	const entityInitials = entityData.name
-		.split(' ')
-		.map((word) => word[0])
-		.join('');
+		? entityData.name
+				.split(' ')
+				.map((word) => word[0])
+				.join('')
+		: '';
 
 	// Handle disconnection
 	const handleDisconnect = async () => {

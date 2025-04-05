@@ -93,9 +93,11 @@ export default function ProfilePage() {
 									<Avatar className='h-24 w-24 border-2 border-slate-700 mb-4'>
 										<AvatarFallback className='bg-purple-900/50 text-purple-300 text-2xl'>
 											{entityData.name
-												.split(' ')
-												.map((word) => word[0])
-												.join('')}
+												? entityData.name
+														.split(' ')
+														.map((word) => word[0])
+														.join('')
+												: ''}
 										</AvatarFallback>
 									</Avatar>
 									<h3 className='text-xl font-bold text-white'>
