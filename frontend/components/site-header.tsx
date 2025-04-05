@@ -102,7 +102,7 @@ export function SiteHeader({
 			<div className='flex items-center gap-4'>
 				<Link href='/' className='flex items-center gap-2'>
 					<Lock className='h-6 w-6 text-purple-500' />
-					<span className='text-xl font-bold text-white'>SecureVote</span>
+					<span className='text-xl font-bold text-white'>ENVOTE</span>
 				</Link>
 			</div>
 

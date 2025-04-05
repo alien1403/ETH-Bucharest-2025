@@ -18,26 +18,8 @@ type Environment = keyof typeof CONTRACT_ADDRESSES;
 
 // Get the current environment
 export const getCurrentEnvironment = (): Environment => {
-	// Check if we're in the browser
-	if (typeof window !== 'undefined') {
-		// Check if there's a preferred environment in localStorage
-		const preferredEnv = localStorage.getItem('preferred-environment');
-		if (
-			preferredEnv &&
-			(preferredEnv === 'local' ||
-				preferredEnv === 'development' ||
-				preferredEnv === 'test' ||
-				preferredEnv === 'production')
-		) {
-			return preferredEnv as Environment;
-		}
-
-		// Default to local for development
-		return 'local';
-	}
-
-	// Server-side rendering
-	return 'development';
+	// Always use local environment
+	return 'local';
 };
 
 // Get the contract address for the current environment

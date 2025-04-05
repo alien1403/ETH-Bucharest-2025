@@ -79,7 +79,7 @@ export default function FAQPage() {
 									Technical Details
 								</h2>
 								<p className='mt-2 text-sm text-slate-400'>
-									Information about the technology behind SecureVote
+									Information about the technology behind ENVOTE
 								</p>
 							</div>
 						</div>
@@ -87,19 +87,19 @@ export default function FAQPage() {
 						<Accordion type='single' collapsible className='w-full'>
 							<AccordionItem value='item-1' className='border-slate-800'>
 								<AccordionTrigger className='text-white hover:text-purple-400'>
-									How does SecureVote ensure my vote remains private?
+									How does ENVOTE ensure my vote remains private?
 								</AccordionTrigger>
 								<AccordionContent className='text-slate-400'>
-									SecureVote uses end-to-end encryption to protect your vote
-									from the moment you cast it. Your vote is encrypted on your
-									device before being transmitted, and it remains encrypted
-									throughout the entire process. We use fully homomorphic
-									encryption (FHE) to tally votes while they remain encrypted.
-									This revolutionary technology allows mathematical operations
-									on encrypted data without ever decrypting it. This means that
-									no one, not even the system administrators, can see your
-									individual vote, eliminating opportunities for corruption or
-									manipulation in electoral processes.
+									ENVOTE uses end-to-end encryption to protect your vote from
+									the moment you cast it. Your vote is encrypted on your device
+									before being transmitted, and it remains encrypted throughout
+									the entire process. We use fully homomorphic encryption (FHE)
+									to tally votes while they remain encrypted. This revolutionary
+									technology allows mathematical operations on encrypted data
+									without ever decrypting it. This means that no one, not even
+									the system administrators, can see your individual vote,
+									eliminating opportunities for corruption or manipulation in
+									electoral processes.
 								</AccordionContent>
 							</AccordionItem>
 
@@ -108,12 +108,12 @@ export default function FAQPage() {
 									Can I verify that my vote was counted correctly?
 								</AccordionTrigger>
 								<AccordionContent className='text-slate-400'>
-									Yes, SecureVote provides a cryptographic receipt after you
-									vote. This receipt allows you to verify that your vote was
-									included in the final tally without revealing what your vote
-									was. You can use our verification tool to check that your vote
-									was recorded correctly on the blockchain and included in the
-									final count.
+									Yes, ENVOTE provides a cryptographic receipt after you vote.
+									This receipt allows you to verify that your vote was included
+									in the final tally without revealing what your vote was. You
+									can use our verification tool to check that your vote was
+									recorded correctly on the blockchain and included in the final
+									count.
 								</AccordionContent>
 							</AccordionItem>
 
@@ -122,7 +122,7 @@ export default function FAQPage() {
 									What happens if there's a technical issue while I'm voting?
 								</AccordionTrigger>
 								<AccordionContent className='text-slate-400'>
-									SecureVote is designed to be resilient to technical issues. If
+									ENVOTE is designed to be resilient to technical issues. If
 									your connection is interrupted while voting, your vote will
 									not be recorded, and you can try again when your connection is
 									restored. The system will never record a partial or corrupted
@@ -153,9 +153,9 @@ export default function FAQPage() {
 									What wallets are supported for authentication?
 								</AccordionTrigger>
 								<AccordionContent className='text-slate-400'>
-									SecureVote supports a wide range of popular blockchain wallets
-									for authentication, including MetaMask, WalletConnect,
-									Coinbase Wallet, and other Ethereum-compatible wallets. We're
+									ENVOTE supports a wide range of popular blockchain wallets for
+									authentication, including MetaMask, WalletConnect, Coinbase
+									Wallet, and other Ethereum-compatible wallets. We're
 									constantly adding support for additional wallets to make the
 									platform accessible to more users. The wallet is only used for
 									authentication and doesn't require any cryptocurrency
@@ -210,14 +210,14 @@ export default function FAQPage() {
 
 							<AccordionItem value='item-9' className='border-slate-800'>
 								<AccordionTrigger className='text-white hover:text-purple-400'>
-									Is SecureVote open source?
+									Is ENVOTE open source?
 								</AccordionTrigger>
 								<AccordionContent className='text-slate-400'>
-									Yes, SecureVote is committed to transparency and security
-									through open-source development. Our core cryptographic
-									protocols and voting mechanisms are open source and available
-									for public review on GitHub. This allows security researchers
-									and the community to verify our implementation and suggest
+									Yes, ENVOTE is committed to transparency and security through
+									open-source development. Our core cryptographic protocols and
+									voting mechanisms are open source and available for public
+									review on GitHub. This allows security researchers and the
+									community to verify our implementation and suggest
 									improvements. We believe that security through obscurity is
 									not a reliable approach, and that open-source development
 									leads to more secure and trustworthy systems.
@@ -230,8 +230,8 @@ export default function FAQPage() {
 								</AccordionTrigger>
 								<AccordionContent className='text-slate-400'>
 									Creating your own voting event will be available in future
-									releases of SecureVote. The feature will allow organizations
-									and communities to create customized voting events with
+									releases of ENVOTE. The feature will allow organizations and
+									communities to create customized voting events with
 									configurable parameters such as voting period, eligibility
 									requirements, and question formats. If you're interested in
 									creating a voting event for your organization, please contact
@@ -241,10 +241,10 @@ export default function FAQPage() {
 							</AccordionItem>
 							<AccordionItem value='item-11' className='border-slate-800'>
 								<AccordionTrigger className='text-white hover:text-purple-400'>
-									How does SecureVote help combat corruption in elections?
+									How does ENVOTE help combat corruption in elections?
 								</AccordionTrigger>
 								<AccordionContent className='text-slate-400'>
-									SecureVote's fully homomorphic encryption (FHE) technology
+									ENVOTE's fully homomorphic encryption (FHE) technology
 									prevents corruption in elections by ensuring that votes cannot
 									be manipulated or tampered with at any stage of the process.
 									Since individual votes are never decrypted, there's no

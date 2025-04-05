@@ -38,8 +38,8 @@ export default function FeaturesPage() {
 							</span>
 						</h1>
 						<p className='mt-6 text-xl text-slate-400'>
-							Discover the powerful features that make SecureVote the most
-							secure and private voting platform available, designed to combat
+							Discover the powerful features that make ENVOTE the most secure
+							and private voting platform available, designed to combat
 							corruption in elections and create truly fair voting systems
 							through fully homomorphic encryption.
 						</p>
@@ -401,7 +401,7 @@ export default function FeaturesPage() {
 							Compare with Traditional Voting
 						</h2>
 						<p className='mt-4 text-center text-slate-400'>
-							See how SecureVote compares to traditional voting methods
+							See how ENVOTE compares to traditional voting methods
 						</p>
 
 						<div className='mt-12 overflow-hidden rounded-lg border border-slate-800 bg-slate-900/50 shadow-lg backdrop-blur'>
@@ -413,7 +413,7 @@ export default function FeaturesPage() {
 												Feature
 											</th>
 											<th className='px-6 py-4 text-center text-sm font-medium text-purple-400'>
-												SecureVote
+												ENVOTE
 											</th>
 											<th className='px-6 py-4 text-center text-sm font-medium text-slate-300'>
 												Traditional Voting

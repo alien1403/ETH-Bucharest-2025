@@ -19,10 +19,10 @@ export default function HowItWorksPage() {
 						Works
 					</h1>
 					<p className='mt-6 text-xl text-slate-400'>
-						Our platform uses fully homomorphic encryption (FHE) to ensure your
-						vote remains private while maintaining transparency and
-						verifiability. Designed to combat corruption in elections and create
-						truly fair voting systems worldwide.
+						ENVOTE combines end-to-end encryption, fully homomorphic encryption,
+						and blockchain technology to create a voting system that is both
+						private and verifiable. Designed to combat corruption in elections
+						and create truly fair voting systems worldwide.
 					</p>
 				</div>
 			</section>
@@ -36,7 +36,7 @@ export default function HowItWorksPage() {
 								The Confidential Voting Process
 							</h2>
 							<p className='mt-4 text-slate-400'>
-								SecureVote combines end-to-end encryption, fully homomorphic
+								ENVOTE combines end-to-end encryption, fully homomorphic
 								encryption, and blockchain technology to create a voting system
 								that is both private and verifiable.
 							</p>
