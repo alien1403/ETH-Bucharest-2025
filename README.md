@@ -1,10 +1,10 @@
-## 📝 **Business Plan: SecureVote**
+## 📝 **Business Plan: Envote**
 
 **Next-Gen Confidential Voting on Arbitrum**
 
 ### 💡 **Project Name**
 
-**SecureVote** - _FHE-Powered Voting with Rust Backend & Arbitrum Stylus_
+**Envote** - _FHE-Powered Voting with Rust Backend & Arbitrum Stylus_
 
 ---
 
@@ -59,7 +59,7 @@ _The first fully homomorphic encrypted voting protocol running on Arbitrum Stylu
 | --------------- | ------ | ----------------------- |
 | Rust Devs       | $120k  | Core FHE optimization   |
 | Arbitrum Grants | $75k   | Stylus deployment costs |
-| Security Audits | $60k   | NCC Group FHE audit     |
+| rity Audits | $60k   | NCC Group FHE audit     |
 
 ---
 
