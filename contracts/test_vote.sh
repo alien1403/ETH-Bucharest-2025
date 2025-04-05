@@ -9,6 +9,8 @@ CONTRACT_ADDR="$1"
 RPC_URL="http://localhost:8547"
 PRIVATE_KEY="0xb6b15c8cb491557369f3c7d2c287b053eb229daa9c22138887752191c9520659"
 CAMPAIGN_ID=0
+ELIGIBLE_WALLET="0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E"
+NON_ELIGIBLE_WALLET="0x1dc3e716E49d055Cb1BD5cc4741bfbbA34bb76DD"
 
 # echo "Sending createCampaign..."
 # cast send "$CONTRACT_ADDR" \
@@ -37,11 +39,11 @@ CAMPAIGN_ID=0
   "createCampaign(string,string,uint256,uint256,uint8,uint8[],address[])(uint256)" \
   "Test Campaign" \
   "A basic test" \
-  0 \
-  1000000 \
+  1 \
+  1943832043 \
   3 \
   "[6, 29, 99, 62, 224, 50, 233, 244, 165, 46, 163, 252, 242, 68, 252, 222, 162, 20, 139, 1, 82, 29, 192, 106, 222, 36, 58, 235, 131, 38, 121, 61]" \
-  "[0x9dcBe706E49b055Ca1BD5cc4741bfbbA34bc83FD, 0x99e096F18fbFF2808f7388859b387fdD056a3589]" \
+  "[0x9dcBe706E49b055Ca1BD5cc4741bfbbA34bc83FD, 0x3f1Eae7D46d88F08fc2F8ed27FCb2AB183EB2d0E]" \
   --private-key "$PRIVATE_KEY" \
   --rpc-url http://localhost:8547
 
@@ -74,17 +76,33 @@ cast call $CONTRACT_ADDR "getCampaignPublicKey(uint256)(uint8[])" $CAMPAIGN_ID -
 echo ""
 
 echo "getVotesForCampaign:"
-cast call $CONTRACT_ADDR "getVotesForCampaign(uint256)(uint256[])" $CAMPAIGN_ID --rpc-url $RPC_URL
+cast call $CONTRACT_ADDR "tallyVotes(uint256)(uint256[])" $CAMPAIGN_ID --rpc-url $RPC_URL
 echo ""
 
-echo "isWalletEligible (true):"
-cast call $CONTRACT_ADDR "isWalletEligible(uint256,address)(bool)" $CAMPAIGN_ID 0x9dcBe706E49b055Ca1BD5cc4741bfbbA34bc83FD --rpc-url $RPC_URL
+echo "isWalletEligible (expected true) - address: $ELIGIBLE_WALLET"
+cast call $CONTRACT_ADDR "isWalletEligible(uint256,address)(bool)" $CAMPAIGN_ID "$ELIGIBLE_WALLET" --rpc-url $RPC_URL
 echo ""
 
-echo "isWalletEligible (false):"
-cast call $CONTRACT_ADDR "isWalletEligible(uint256,address)(bool)" $CAMPAIGN_ID 0x9dcBe706E49b055Ca1BD5cc4741bfbbA34bc83DD --rpc-url $RPC_URL
+echo "isWalletEligible (expected false) - address: $NON_ELIGIBLE_WALLET"
+cast call $CONTRACT_ADDR "isWalletEligible(uint256,address)(bool)" $CAMPAIGN_ID "$NON_ELIGIBLE_WALLET" --rpc-url $RPC_URL
 echo ""
 
+for ((i = 1; i <= 8; i++)); do
+  echo "Voting for option 0... #$i"
+  cast send $CONTRACT_ADDR "vote(uint8,uint256)" 0 $CAMPAIGN_ID --rpc-url $RPC_URL --private-key $PRIVATE_KEY
+done  
+
+for ((i = 1; i <= 12; i++)); do
+  echo "Voting for option 1... #$i"
+  cast send $CONTRACT_ADDR "vote(uint8,uint256)" 1 $CAMPAIGN_ID --rpc-url $RPC_URL --private-key $PRIVATE_KEY
+done  
+
+for ((i = 1; i <= 10; i++)); do
+  echo "Voting for option 2... #$i"
+  cast send $CONTRACT_ADDR "vote(uint8,uint256)" 2 $CAMPAIGN_ID --rpc-url $RPC_URL --private-key $PRIVATE_KEY
+done
+
+cast call $CONTRACT_ADDR "tallyVotes(uint256)(uint256[])" 0 --rpc-url $RPC_URL
 
 # echo "Calling getCampaignDescription..."
 # cast call "$CONTRACT_ADDR" \
