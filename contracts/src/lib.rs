@@ -119,7 +119,7 @@ impl VotingSystem {
             "Wallet is not eligible to vote"
         );
         assert!(!campaign.is_tallyed.get(), "Campaign has been tallied");
-        // assert!(!campaign.has_voted.getter(sender).get(), "Already voted");
+        assert!(!campaign.has_voted.getter(sender).get(), "Already voted");
 
         let option_count = campaign.option_count.get();
         assert!(
