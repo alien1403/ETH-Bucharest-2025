@@ -7,11 +7,17 @@
 pragma solidity ^0.8.23;
 
 interface IVotingSystem  {
-    function createCampaign(string calldata description, uint256 start_time, uint256 end_time, uint8 option_count, uint8[] memory public_key) external returns (uint256);
+    function createCampaign(string calldata title, string calldata description, uint256 start_time, uint256 end_time, uint8 option_count, uint8[] memory public_key, address[] memory eligible_voters) external returns (uint256);
 
-    function vote(uint8[] memory encrypted_vote, uint256 campaign_id) external;
+    function secureVote(bytes[] memory encrypted_vote, uint256 campaign_id) external;
 
-    function tallyVotes(uint256 campaign_id) external;
+    function vote(uint8 option, uint256 campaign_id) external;
+
+    function tallyEncryptedVotes(uint256 campaign_id) external;
+
+    function tallyVotes(uint256 campaign_id) external view returns (uint256[] memory);
+
+    function getCampaignTitle(uint256 campaign_id) external view returns (string memory);
 
     function getCampaignOwner(uint256 campaign_id) external view returns (address);
 
@@ -26,4 +32,8 @@ interface IVotingSystem  {
     function getCampaignPublicKey(uint256 campaign_id) external view returns (uint8[] memory);
 
     function isCampaignTallied(uint256 campaign_id) external view returns (bool);
+
+    function isWalletEligible(uint256 campaign_id, address wallet_address) external view returns (bool);
+
+    function getNumCampaigns() external view returns (uint256);
 }

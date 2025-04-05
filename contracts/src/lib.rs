@@ -33,6 +33,7 @@ pub struct Campaign {
     is_tallyed: StorageBool,
     has_voted: StorageMap<Address, StorageBool>,
     option_to_votes: StorageMap<U8, StorageU256>,
+    eligible_wallets: StorageMap<Address, StorageBool>,
 
     //secure votes
     public_key: StorageBytes,
@@ -75,7 +76,7 @@ impl VotingSystem {
         new_campaign.is_tallyed.set(false);
 
         for address in eligible_voters {
-            new_campaign.has_voted.setter(address).set(true);
+            new_campaign.eligible_wallets.setter(address).set(true);
         }
 
         campaign_id
@@ -113,11 +114,18 @@ impl VotingSystem {
         let campaign = self.campaigns.getter(campaign_id);
 
         let sender = self.vm().msg_sender();
+        assert!(
+            campaign.eligible_wallets.getter(sender).get(),
+            "Wallet is not eligible to vote"
+        );
         assert!(!campaign.is_tallyed.get(), "Campaign has been tallied");
-        assert!(!campaign.has_voted.getter(sender).get(), "Already voted");
+        // assert!(!campaign.has_voted.getter(sender).get(), "Already voted");
 
         let option_count = campaign.option_count.get();
-        assert!(option < option_count, "Invalid option");
+        assert!(
+            option < option_count && option >= U8::from(0),
+            "Invalid option"
+        );
 
         // Check voting period
         let current_time = self.vm().block_timestamp();
@@ -141,7 +149,7 @@ impl VotingSystem {
             .set(current_votes + U256::from(1));
     }
 
-    pub fn tally_votes(&mut self, campaign_id: U256) {
+    pub fn tally_encrypted_votes(&mut self, campaign_id: U256) {
         let campaign = self.campaigns.get(campaign_id);
 
         assert!(
@@ -154,7 +162,7 @@ impl VotingSystem {
         );
     }
 
-    pub fn get_votes_for_campaign(&self, campaign_id: U256) -> Vec<U256> {
+    pub fn tally_votes(&self, campaign_id: U256) -> Vec<U256> {
         let num_options = self
             .campaigns
             .getter(campaign_id)
@@ -210,7 +218,12 @@ impl VotingSystem {
     pub fn is_wallet_eligible(&self, campaign_id: U256, wallet_address: Address) -> bool {
         self.campaigns
             .getter(campaign_id)
-            .has_voted
-            .get(wallet_address)
+            .eligible_wallets
+            .getter(wallet_address)
+            .get()
+    }
+
+    pub fn get_num_campaigns(&self) -> U256 {
+        self.campaign_count.get()
     }
 }
